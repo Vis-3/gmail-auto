@@ -166,12 +166,51 @@ Gmail_Auto/
 ├── .github/
 │   └── workflows/
 │       └── ci.yml        # GitHub Actions CI
-├── start.bat             # Windows Task Scheduler launcher
+├── Procfile              # Railway worker process definition
+├── railway.toml          # Railway volume mount config
+├── start.bat             # Windows Task Scheduler launcher (local)
 ├── credentials.json      # Google OAuth client secrets  (gitignored)
 ├── token.json            # OAuth access + refresh token (gitignored)
 ├── app.db                # SQLite database              (gitignored)
 └── .env                  # Secrets                      (gitignored)
 ```
+
+## Deploying to Railway
+
+Railway runs the script 24/7 so you don't need your laptop on.
+
+### 1. Encode your secrets as base64
+
+In PowerShell:
+
+```powershell
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("credentials.json"))
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("token.json"))
+```
+
+### 2. Add environment variables in Railway dashboard
+
+| Variable | Value |
+|---|---|
+| `CREDENTIALS_JSON_B64` | output of the first command above |
+| `TOKEN_JSON_B64` | output of the second command above |
+| `GROQ_API_KEY` | your Groq key |
+| `TELEGRAM_BOT_TOKEN` | your bot token |
+| `TELEGRAM_CHAT_ID` | your chat ID |
+| `LANGFUSE_PUBLIC_KEY` | your Langfuse public key |
+| `LANGFUSE_SECRET_KEY` | your Langfuse secret key |
+| `LANGFUSE_BASE_URL` | your Langfuse base URL |
+| `DB_PATH` | `/data/app.db` |
+
+### 3. Add a volume
+
+In Railway: **New → Volume** → mount path `/data`. This persists `app.db` across redeploys.
+
+### 4. Deploy
+
+Push to GitHub — Railway auto-deploys from the connected repo. The worker starts automatically.
+
+> **Note:** `token.json` contains a refresh token that never expires as long as it's used. If Railway ever loses the decoded file (e.g. before the volume is mounted), re-run the base64 encode locally and update `TOKEN_JSON_B64`.
 
 ## Tests
 

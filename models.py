@@ -1,9 +1,12 @@
 import sqlite3
+import os
 from llm_classifier import ClassificationOutput
 from datetime import datetime
 
+DB_PATH = os.getenv("DB_PATH", "app.db")
+
 def init_db():
-    conn = sqlite3.connect("app.db")
+    conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("""
 CREATE TABLE IF NOT EXISTS EMAIL_DATA(
@@ -35,7 +38,7 @@ CREATE TABLE IF NOT EXISTS EMAIL_DATA(
 
 
 def insert_email(email: dict, classification):
-    conn = sqlite3.connect("app.db")
+    conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("""
         INSERT INTO EMAIL_DATA 
@@ -65,7 +68,7 @@ def insert_email(email: dict, classification):
     conn.close()
 
 def get_email(message_id: str):
-    conn = sqlite3.connect("app.db")
+    conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM EMAIL_DATA WHERE message_id = ?", (message_id,))
     row = cursor.fetchone()
@@ -73,14 +76,14 @@ def get_email(message_id: str):
     return row
 
 def update_state(message_id:str, new_state:str):
-    conn = sqlite3.connect("app.db")
+    conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("UPDATE EMAIL_DATA SET state = ? WHERE message_id = ?", (new_state, message_id))
     conn.commit()
     conn.close()
 
 def update_draft(message_id:str, draft_id:str):
-    conn = sqlite3.connect("app.db")
+    conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("UPDATE EMAIL_DATA SET draft_id = ? WHERE message_id = ?", (draft_id, message_id))
     conn.commit()
