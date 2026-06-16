@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Run tests
+        env:
+          GROQ_API_KEY: dummy
+          TELEGRAM_BOT_TOKEN: dummy
+          TELEGRAM_CHAT_ID: dummy
+        run: uv run pytest tests/ -v

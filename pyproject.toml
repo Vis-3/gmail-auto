@@ -15,3 +15,8 @@ dependencies = [
     "python-telegram-bot>=22.8",
     "langfuse>=2.0.0",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.0",
+]

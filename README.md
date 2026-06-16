@@ -63,6 +63,8 @@ The rule-based tier handles clear-cut cases instantly (zero LLM cost). Only ambi
 | Async | `asyncio.gather` |
 | Observability | Langfuse (LLM call tracing) |
 | Auto-start | Windows Task Scheduler |
+| Testing | pytest |
+| CI | GitHub Actions |
 
 ## Setup
 
@@ -158,11 +160,28 @@ Gmail_Auto/
 ├── models.py             # SQLite
 ├── config.py             # Environment config
 ├── pyproject.toml        # Dependencies
+├── tests/
+│   ├── conftest.py       # Path setup for pytest
+│   └── test_classifier.py
+├── .github/
+│   └── workflows/
+│       └── ci.yml        # GitHub Actions CI
+├── start.bat             # Windows Task Scheduler launcher
 ├── credentials.json      # Google OAuth client secrets  (gitignored)
 ├── token.json            # OAuth access + refresh token (gitignored)
 ├── app.db                # SQLite database              (gitignored)
 └── .env                  # Secrets                      (gitignored)
 ```
+
+## Tests
+
+Unit tests cover the classification pipeline — Pydantic schema validation, all rule-based filter paths, and the LLM call path (mocked):
+
+```bash
+uv run pytest tests/ -v
+```
+
+CI runs automatically on every push via GitHub Actions (`.github/workflows/ci.yml`). No secrets are required in CI — the Groq and Telegram keys are stubbed with dummy values since the LLM is mocked in tests.
 
 ## Security Notes
 
