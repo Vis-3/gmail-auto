@@ -47,6 +47,7 @@ This document covers the design decisions, difficulties encountered, bugs fixed,
 **Reasoning:** If the process crashes or is restarted, the state column tells us exactly where each email is. Timestamp columns give a full audit trail. The `message_id` primary key from Gmail prevents duplicate processing — if we try to insert an email we've already processed, the `PRIMARY KEY` constraint raises an exception and we `continue` to the next email silently.
 
 **State machine:**
+
 ```
 new → classified → notified → drafted → read_complete (terminal)
                              ↘ read_complete (no_reply)
@@ -131,11 +132,13 @@ new → classified → notified → drafted → read_complete (terminal)
 **Symptom:** Crashes on emails with unusual MIME structure.
 
 **Cause:** Multiple related issues:
+
 1. Some emails have no `text/plain` part — only `text/html`
 2. Some emails have no `parts` array at all (simple, non-multipart messages)
 3. The base64 decode would crash if `body` was `None`
 
 **Fix:** Added a chain of fallbacks:
+
 - Try `text/plain` first
 - Fall back to `text/html`
 - Fall back to `None`
@@ -226,8 +229,6 @@ Several `print()` statements and `emails[:1]` slices left over from debugging we
 
 ## Known Limitations
 
-- **No auto-start:** The script must be started manually each morning. A Windows Task Scheduler entry or `systemd` unit would fix this.
 - **Sent-mail whitelist is slow:** `get_sent_emails()` makes one API call per sent email to read the `To` header. A batch metadata fetch would be faster.
 - **No reminder system:** Phase 5 (reminder scheduling via APScheduler) was intentionally skipped — checking Gmail drafts daily is sufficient for this use case.
-- **No observability:** Sentry for error tracking and Langfuse for LLM call tracing would improve debuggability in a production setting, but add complexity not warranted for a personal tool.
 - **Token expiry is silent:** If `token.json` is deleted or the refresh token is revoked, the script fails with an auth error and needs to be restarted to re-authorize via the browser flow.

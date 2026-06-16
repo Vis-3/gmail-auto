@@ -5,6 +5,7 @@ import re
 from groq import Groq
 from config import GROQ_API_KEY
 import json
+from langfuse import observe
 
 class Categories(str, Enum):
     job_update = "job_update"
@@ -68,6 +69,7 @@ Email: From: Recruiting <recruiting@google.com>, Subject: Your application for S
 
 client = Groq(api_key=GROQ_API_KEY)
 
+@observe()
 def classify_email(email:dict):
   
     

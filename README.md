@@ -61,6 +61,8 @@ The rule-based tier handles clear-cut cases instantly (zero LLM cost). Only ambi
 | Notifications | Telegram Bot API (python-telegram-bot) |
 | Database | SQLite via `sqlite3` |
 | Async | `asyncio.gather` |
+| Observability | Langfuse (LLM call tracing) |
+| Auto-start | Windows Task Scheduler |
 
 ## Setup
 
@@ -105,12 +107,32 @@ Create `.env` in the project root:
 GROQ_API_KEY=gsk_...
 TELEGRAM_BOT_TOKEN=your_bot_token
 TELEGRAM_CHAT_ID=your_chat_id
+
+# Optional — Langfuse LLM observability (leave blank to disable tracing)
+LANGFUSE_PUBLIC_KEY=pk-lf-...
+LANGFUSE_SECRET_KEY=sk-lf-...
 ```
+
+Get your Langfuse keys from [cloud.langfuse.com](https://cloud.langfuse.com) (free tier). If the keys are absent, the `@observe()` decorators are silently skipped — nothing breaks.
 
 ### 5. Run
 
 ```bash
 uv run main.py
+```
+
+### 6. Auto-start on login (Windows Task Scheduler)
+
+Register `start.bat` to run automatically when you log in:
+
+```cmd
+schtasks /create /tn "GmailAuto" /tr "\"C:\Users\sansk\Documents\Spring-26\Gmail_Auto\start.bat\"" /sc onlogon /rl highest /f
+```
+
+To remove it later:
+
+```cmd
+schtasks /delete /tn "GmailAuto" /f
 ```
 
 On first run a browser opens for Gmail OAuth consent. After authorizing, `token.json` is saved and all future runs authenticate silently (auto-refresh on expiry).

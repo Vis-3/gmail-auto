@@ -1,7 +1,7 @@
 from email_fetcher import *
 from groq import Groq
 from config import GROQ_API_KEY
-
+from langfuse import observe
 
 client = Groq(api_key=GROQ_API_KEY)
 SYSTEM_PROMPT = """
@@ -18,6 +18,7 @@ Guidelines:
 - If the email is a rejection or purely informational with nothing to respond to, write "NO_REPLY_NEEDED"
 
 """
+@observe()
 def draft_email(thread_id:str):
   
     thread_list = get_thread_messages(thread_id)
